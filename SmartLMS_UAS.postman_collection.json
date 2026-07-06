@@ -1,0 +1,749 @@
+{
+  "info": {
+    "_postman_id": "smartlms-uas-collection-2024",
+    "name": "SmartLMS UAS - API Collection",
+    "description": "Koleksi lengkap endpoint REST API Smart Learning Management System (LMS).\n\nCara Penggunaan:\n1. Import collection ini ke Postman\n2. Set variabel {{base_url}} ke: http://localhost:8000/api/v1\n3. Jalankan request 'Login' lalu salin nilai 'access' token\n4. Set variabel {{access_token}} dengan nilai token tersebut\n5. Semua request authenticated akan otomatis menggunakan token Bearer\n\nRole: student | teacher | admin",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string",
+      "description": "JWT Access Token dari endpoint /auth/login"
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string",
+      "description": "JWT Refresh Token dari endpoint /auth/login"
+    },
+    {
+      "key": "course_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "content_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "comment_id",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "🔐 Authentication",
+      "description": "Endpoint untuk register, login, refresh token, logout, dan manajemen profil.",
+      "item": [
+        {
+          "name": "Register (Student)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"student01\",\n  \"email\": \"student01@example.com\",\n  \"password\": \"SecurePass123\",\n  \"first_name\": \"Budi\",\n  \"last_name\": \"Santoso\",\n  \"role\": \"student\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Register pengguna baru sebagai student. Role hanya boleh 'student' atau 'teacher'."
+          },
+          "response": []
+        },
+        {
+          "name": "Register (Teacher)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"teacher01\",\n  \"email\": \"teacher01@example.com\",\n  \"password\": \"TeacherPass123\",\n  \"first_name\": \"Siti\",\n  \"last_name\": \"Rahayu\",\n  \"role\": \"teacher\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Register pengguna baru sebagai teacher."
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.access) {",
+                  "    pm.collectionVariables.set('access_token', json.access);",
+                  "    pm.collectionVariables.set('refresh_token', json.refresh);",
+                  "    console.log('Token berhasil disimpan ke collection variables');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"student01\",\n  \"password\": \"SecurePass123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Login dengan username & password. Respons berisi access & refresh JWT token. Script test otomatis menyimpan token ke variabel collection."
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.access) {",
+                  "    pm.collectionVariables.set('access_token', json.access);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/refresh",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "refresh"]
+            },
+            "description": "Perbarui access token menggunakan refresh token yang masih valid."
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/logout",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "logout"]
+            },
+            "description": "Logout (stateless — instruksi client untuk membuang token)."
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "me"]
+            },
+            "description": "Mendapatkan profil pengguna yang sedang login."
+          },
+          "response": []
+        },
+        {
+          "name": "Update My Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Budi\",\n  \"last_name\": \"Updated\",\n  \"bio\": \"Backend developer enthusiast\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "me"]
+            },
+            "description": "Update profil pengguna yang sedang login (first_name, last_name, bio)."
+          },
+          "response": []
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"old_password\": \"SecurePass123\",\n  \"new_password\": \"NewSecurePass456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/change-password",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "change-password"]
+            },
+            "description": "Ganti password pengguna yang sedang login."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📚 Courses",
+      "description": "CRUD Course. List course tidak memerlukan auth. Create/Update/Delete hanya untuk teacher pemilik.",
+      "item": [
+        {
+          "name": "List Courses (Public, Paginasi 5)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/courses/?page=1&page_size=5",
+              "host": ["{{base_url}}"],
+              "path": ["courses", ""],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "page_size", "value": "5" },
+                { "key": "search", "value": "", "disabled": true },
+                { "key": "teacher", "value": "", "disabled": true },
+                { "key": "price_gte", "value": "", "disabled": true },
+                { "key": "price_lte", "value": "", "disabled": true }
+              ]
+            },
+            "description": "Ambil daftar semua course. Tidak memerlukan autentikasi. Default 5 data per halaman."
+          },
+          "response": []
+        },
+        {
+          "name": "List Courses (Filter Search)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/courses/?search=django&page=1&page_size=5",
+              "host": ["{{base_url}}"],
+              "path": ["courses", ""],
+              "query": [
+                { "key": "search", "value": "django" },
+                { "key": "page", "value": "1" },
+                { "key": "page_size", "value": "5" }
+              ]
+            },
+            "description": "Filter course berdasarkan keyword di title atau description."
+          },
+          "response": []
+        },
+        {
+          "name": "List Courses (Filter Harga)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/courses/?price_gte=50000&price_lte=200000&page=1&page_size=5",
+              "host": ["{{base_url}}"],
+              "path": ["courses", ""],
+              "query": [
+                { "key": "price_gte", "value": "50000" },
+                { "key": "price_lte", "value": "200000" },
+                { "key": "page", "value": "1" },
+                { "key": "page_size", "value": "5" }
+              ]
+            },
+            "description": "Filter course berdasarkan range harga (price_gte dan price_lte)."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Course Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/courses/{{course_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["courses", "{{course_id}}"]
+            },
+            "description": "Ambil detail satu course berdasarkan ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Course (Teacher Only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.id) {",
+                  "    pm.collectionVariables.set('course_id', json.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Django Backend Masterclass\",\n  \"category\": \"Backend\",\n  \"price\": 150000,\n  \"description\": \"Belajar Django ORM, REST API, dan deployment Docker secara komprehensif.\",\n  \"status\": \"published\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/courses/",
+              "host": ["{{base_url}}"],
+              "path": ["courses", ""]
+            },
+            "description": "Buat course baru. Hanya teacher yang bisa membuat course."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Course (Teacher Only)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 200000,\n  \"status\": \"published\",\n  \"description\": \"Deskripsi course yang diperbarui.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/courses/{{course_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["courses", "{{course_id}}"]
+            },
+            "description": "Update data course. Hanya teacher pemilik course yang bisa mengubah."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Course (Teacher Only)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/courses/{{course_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["courses", "{{course_id}}"]
+            },
+            "description": "Hapus course. Hanya teacher pemilik course yang bisa menghapus."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "👥 Course Members (Enrollment)",
+      "description": "Enrollment student ke course dan manajemen anggota.",
+      "item": [
+        {
+          "name": "Enroll ke Course (Student Only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/course-members/enroll/{{course_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["course-members", "enroll", "{{course_id}}"]
+            },
+            "description": "Daftarkan (enroll) pengguna student ke dalam course. Hanya role 'student' yang bisa."
+          },
+          "response": []
+        },
+        {
+          "name": "Keluar dari Course (Student Only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/course-members/leave/{{course_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["course-members", "leave", "{{course_id}}"]
+            },
+            "description": "Student meninggalkan course (enrollment dinonaktifkan)."
+          },
+          "response": []
+        },
+        {
+          "name": "List Anggota Course (Teacher Only)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/course-members/course/{{course_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["course-members", "course", "{{course_id}}"]
+            },
+            "description": "List semua anggota course. Hanya teacher pemilik course yang bisa mengakses."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📌 Course Contents",
+      "description": "Manajemen materi/konten course. CRUD hanya untuk teacher pemilik course.",
+      "item": [
+        {
+          "name": "List Contents",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/course-contents/?course_id={{course_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["course-contents", ""],
+              "query": [
+                { "key": "course_id", "value": "{{course_id}}" }
+              ]
+            },
+            "description": "List semua konten untuk course tertentu."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Content Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/course-contents/{{content_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["course-contents", "{{content_id}}"]
+            },
+            "description": "Ambil detail satu konten berdasarkan ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Content (Teacher Only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.id) {",
+                  "    pm.collectionVariables.set('content_id', json.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"course_id\": {{course_id}},\n  \"title\": \"Lesson 1 - Pengenalan Django\",\n  \"description\": \"Instalasi Django dan struktur project.\",\n  \"video_url\": \"https://www.youtube.com/watch?v=example\",\n  \"order\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/course-contents/",
+              "host": ["{{base_url}}"],
+              "path": ["course-contents", ""]
+            },
+            "description": "Tambah konten baru ke course. Hanya teacher pemilik yang bisa."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Content (Teacher Only)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Lesson 1 - Pengenalan Django (Updated)\",\n  \"description\": \"Deskripsi yang diperbarui.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/course-contents/{{content_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["course-contents", "{{content_id}}"]
+            },
+            "description": "Update data konten. Hanya teacher pemilik course yang bisa mengubah."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Content (Teacher Only)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/course-contents/{{content_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["course-contents", "{{content_id}}"]
+            },
+            "description": "Hapus konten course. Hanya teacher pemilik yang bisa."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "💬 Comments",
+      "description": "Komentar dan reply bersarang. Student harus enroll dulu sebelum berkomentar.",
+      "item": [
+        {
+          "name": "List Comments (by Course)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/comments/?course_id={{course_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["comments", ""],
+              "query": [
+                { "key": "course_id", "value": "{{course_id}}" },
+                { "key": "content_id", "value": "", "disabled": true }
+              ]
+            },
+            "description": "List komentar berdasarkan course. Optional filter juga bisa berdasarkan content_id."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Comment (Student/Teacher)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.id) {",
+                  "    pm.collectionVariables.set('comment_id', json.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"course_id\": {{course_id}},\n  \"text\": \"Materinya sangat jelas dan mudah dipahami!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/comments/",
+              "host": ["{{base_url}}"],
+              "path": ["comments", ""]
+            },
+            "description": "Buat komentar baru. Student harus sudah enroll. Teacher bisa berkomentar tanpa enroll."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Reply (Nested Comment)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"course_id\": {{course_id}},\n  \"parent_id\": {{comment_id}},\n  \"text\": \"Terima kasih atas komentar Anda!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/comments/",
+              "host": ["{{base_url}}"],
+              "path": ["comments", ""]
+            },
+            "description": "Buat reply/balasan terhadap komentar lain (nested comment)."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Comment (Own Only)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Komentar yang sudah diperbarui dengan lebih detail.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/comments/{{comment_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["comments", "{{comment_id}}"]
+            },
+            "description": "Edit komentar. Hanya bisa mengedit komentar sendiri."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Comment (Own Only)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/comments/{{comment_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["comments", "{{comment_id}}"]
+            },
+            "description": "Hapus komentar. Hanya bisa menghapus komentar sendiri."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "👤 Users",
+      "description": "Manajemen pengguna (admin / internal dashboard).",
+      "item": [
+        {
+          "name": "List All Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/",
+              "host": ["{{base_url}}"],
+              "path": ["users", ""]
+            },
+            "description": "List semua user. Memerlukan autentikasi."
+          },
+          "response": []
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/1",
+              "host": ["{{base_url}}"],
+              "path": ["users", "1"]
+            },
+            "description": "Ambil profil user berdasarkan ID."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📊 Dashboard & Statistics",
+      "description": "Ringkasan statistik platform untuk dashboard UI dan consumer eksternal.",
+      "item": [
+        {
+          "name": "Dashboard Summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard/",
+              "host": ["{{base_url}}"],
+              "path": ["dashboard", ""]
+            },
+            "description": "Ringkasan statistik: total course, student, teacher, comment, konten, chart harian, dan aktivitas terbaru."
+          },
+          "response": []
+        },
+        {
+          "name": "Statistics Summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/statistics/",
+              "host": ["{{base_url}}"],
+              "path": ["statistics", ""]
+            },
+            "description": "Endpoint statistik alternatif dengan data identik (untuk consumer API eksternal)."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

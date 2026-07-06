@@ -1,0 +1,28 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Tambah Komentar - SmartLMS{% endblock %}
+{% block content %}
+<div class="bg-white border rounded shadow-sm p-4 mb-4">
+  <div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+      <a class="small text-secondary" href="{% url 'course_content_detail' content.id %}">
+        <i class="bi bi-arrow-left me-1"></i>Kembali ke {{ content.title }}
+      </a>
+      <h1 class="h3 mt-2">Tambah Komentar</h1>
+    </div>
+  </div>
+  
+  <form method="post" action="{% url 'add_comment' content.id %}">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label class="form-label fw-bold">Komentar Anda</label>
+      <textarea name="comment" class="form-control" rows="5" required placeholder="Tulis komentar Anda..."></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary rounded-pill shadow-sm">
+      <i class="bi bi-send me-1"></i>Kirim Komentar
+    </button>
+    <a href="{% url 'course_content_detail' content.id %}" class="btn btn-outline-secondary rounded-pill shadow-sm ms-2">
+      <i class="bi bi-x-circle me-1"></i>Batal
+    </a>
+  </form>
+</div>
+{% endblock %}

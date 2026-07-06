@@ -1,0 +1,99 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Home - Smart LMS{% endblock %}
+{% block content %}
+<div class="p-4 p-md-5 mb-4 bg-white border rounded shadow-sm">
+  <div class="row align-items-center g-4">
+    <div class="col-lg-8">
+      <span class="badge text-bg-success mb-3">Smart LMS UAS Backend System</span>
+      <h1 class="display-6 fw-bold">Platform Pembelajaran Digital Berbasis Web</h1>
+      <p class="lead text-secondary mb-4">
+        Sistem Manajemen Pembelajaran (LMS) yang mengimplementasikan Database & Pydantic Schema, Django Ninja REST API, JWT Authentication per Role, Throttling & Pagination, 41 Unit Tests, Swagger Docs, Postman Collection.
+      </p>
+      <div class="d-flex flex-wrap align-items-center gap-2">
+        <!-- PUBLIC / STUDENT BUTTON (Always visible) -->
+        <a href="{% url 'course_list' %}" class="btn btn-primary rounded-pill shadow-sm">
+          <i class="bi bi-book me-2"></i>Lihat Mata Kuliah (Frontend)
+        </a>
+
+        <!-- TEACHER & ADMIN BUTTON (Only for staff/teacher) -->
+        {% if user.is_authenticated and user.is_staff %}
+        <a href="/admin/courses/course/" class="btn btn-outline-primary rounded-pill shadow-sm">
+          <i class="bi bi-pencil-square me-2"></i>Manajemen Data Kursus
+        </a>
+        {% endif %}
+
+        <!-- ADMIN / SUPERUSER BUTTONS (Only for superuser) -->
+        {% if user.is_authenticated and user.is_superuser %}
+        <a href="/api/v1/docs" target="_blank" class="btn btn-outline-primary rounded-pill shadow-sm">
+          <i class="bi bi-file-earmark-code me-2"></i>Swagger REST API Docs
+        </a>
+        <a href="/admin/accounts/user/" class="btn btn-outline-primary rounded-pill shadow-sm">
+          <i class="bi bi-shield-lock me-2"></i>Manajemen User & Role JWT
+        </a>
+        <a href="/admin/" class="btn btn-outline-primary rounded-pill shadow-sm">
+          <i class="bi bi-sliders me-2"></i>Panel Utama Django Admin
+        </a>
+        {% endif %}
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="row g-3">
+        <div class="col-6 col-lg-12">
+          <div class="border rounded p-3 bg-light">
+            <div class="fs-3 fw-bold">{{ total_courses }}</div>
+            <div class="text-secondary">Mata Kuliah</div>
+          </div>
+        </div>
+        <div class="col-6 col-lg-12">
+          <div class="border rounded p-3 bg-light">
+            <div class="fs-3 fw-bold">{{ total_users }}</div>
+            <div class="text-secondary">Pengguna</div>
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="border rounded p-3 bg-light">
+            <div class="fs-3 fw-bold">{{ total_comments }}</div>
+            <div class="text-secondary">Komentar Diskusi</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="bg-white border rounded shadow-sm p-4 h-100">
+      <h2 class="h5 mb-3">Mata Kuliah Populer</h2>
+      <div class="list-group list-group-flush">
+        {% for course in popular_courses %}
+          <a class="list-group-item list-group-item-action rounded-3 mb-2 border shadow-sm" href="{% url 'course_detail' course.id %}">
+            <div class="d-flex justify-content-between">
+              <strong>{{ course.title }}</strong>
+              <span class="badge text-bg-primary">{{ course.member_count }} member</span>
+            </div>
+            <small class="text-secondary">Pengajar: {{ course.teacher.username }}</small>
+          </a>
+        {% empty %}
+          <div class="text-secondary">Belum ada mata kuliah. Jalankan seed data terlebih dahulu.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="bg-white border rounded shadow-sm p-4 h-100">
+      <h2 class="h5 mb-3">Akses Cepat</h2>
+      <div class="list-group">
+        <a class="list-group-item list-group-item-action" href="{% url 'course_list' %}"><i class="bi bi-book me-2"></i>Lihat Semua Mata Kuliah</a>
+        {% if user.is_authenticated %}
+        <a class="list-group-item list-group-item-action" href="{% url 'my_courses' %}"><i class="bi bi-journal-bookmark me-2"></i>Mata Kuliah Saya</a>
+        {% endif %}
+        <a class="list-group-item list-group-item-action" href="/api/v1/docs" target="_blank"><i class="bi bi-file-earmark-code me-2"></i>Dokumentasi API</a>
+        {% if user.is_staff %}
+        <a class="list-group-item list-group-item-action" href="/admin/"><i class="bi bi-sliders me-2"></i>Admin Panel</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

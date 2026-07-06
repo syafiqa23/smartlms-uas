@@ -1,0 +1,112 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Dashboard - SmartLMS{% endblock %}
+{% block content %}
+
+<h1 class="h3 mb-4">Dashboard</h1>
+
+<!-- Role-based Statistics Cards -->
+<div class="row g-4 mb-4">
+
+  {% if user_role == 'admin' %}
+    <div class="col-md-4">
+      <div class="card p-3 shadow-sm">
+        <h6 class="text-muted mb-2">Total User</h6>
+        <div class="display-6">{{ stats.total_users }}</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card p-3 shadow-sm">
+        <h6 class="text-muted mb-2">Total Guru</h6>
+        <div class="display-6">{{ stats.total_teachers }}</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card p-3 shadow-sm">
+        <h6 class="text-muted mb-2">Total Siswa</h6>
+        <div class="display-6">{{ stats.total_students }}</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card p-3 shadow-sm">
+        <h6 class="text-muted mb-2">Total Kursus</h6>
+        <div class="display-6">{{ stats.total_courses }}</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card p-3 shadow-sm">
+        <h6 class="text-muted mb-2">Total Konten</h6>
+        <div class="display-6">{{ stats.total_contents }}</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card p-3 shadow-sm">
+        <h6 class="text-muted mb-2">Total Komentar</h6>
+        <div class="display-6">{{ stats.total_comments }}</div>
+      </div>
+    </div>
+  {% elif user_role == 'teacher' %}
+    <div class="col-md-4">
+      <div class="card p-3 shadow-sm">
+        <h6 class="text-muted mb-2">Total Kursus</h6>
+        <div class="display-6">{{ stats.total_courses }}</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card p-3 shadow-sm">
+        <h6 class="text-muted mb-2">Total Siswa</h6>
+        <div class="display-6">{{ stats.total_students }}</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card p-3 shadow-sm">
+        <h6 class="text-muted mb-2">Total Konten</h6>
+        <div class="display-6">{{ stats.total_contents }}</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card p-3 shadow-sm">
+        <h6 class="text-muted mb-2">Total Komentar</h6>
+        <div class="display-6">{{ stats.total_comments }}</div>
+      </div>
+    </div>
+  {% else %}
+    <div class="col-md-4">
+      <div class="card p-3 shadow-sm">
+        <h6 class="text-muted mb-2">Kursus Saya</h6>
+        <div class="display-6">{{ stats.total_courses }}</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card p-3 shadow-sm">
+        <h6 class="text-muted mb-2">Komentar Saya</h6>
+        <div class="display-6">{{ stats.total_comments }}</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card p-3 shadow-sm">
+        <h6 class="text-muted mb-2">Kursus Aktif</h6>
+        <div class="display-6">{{ stats.active_courses }}</div>
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+
+<!-- My Courses -->
+<div class="bg-white p-4 rounded shadow-sm">
+  <h4 class="mb-3">Kursus Saya</h4>
+  <ul class="list-group">
+    {% for c in courses %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span>{{ c.course.title }}</span>
+        <span class="badge bg-primary">{{ c.get_role_display }}</span>
+      </li>
+    {% empty %}
+      <li class="list-group-item text-muted text-center py-4">
+        Belum mengikuti kursus
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+
+{% endblock %}

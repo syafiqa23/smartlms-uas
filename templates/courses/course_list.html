@@ -1,0 +1,386 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Courses - SmartLMS{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <h1 class="h3 mb-2">Daftar Mata Kuliah</h1>
+  <p class="text-secondary">Jelajahi, cari, dan kelola daftar mata kuliah yang tersedia.</p>
+</div>
+
+<!-- SEARCH & SORT SECTION -->
+<div class="bg-white border rounded shadow-sm p-4 mb-4">
+  <form id="filterForm" class="row g-3 align-items-end">
+    <!-- Search Input -->
+    <div class="col-md-3">
+      <label for="search" class="form-label fw-bold"><i class="bi bi-search me-1"></i>Pencarian</label>
+      <input
+        type="text"
+        class="form-control"
+        id="search"
+        name="search"
+        placeholder="Cari nama kursus, deskripsi, atau pengajar..."
+        value="{{ search_query|default:'' }}"
+      >
+    </div>
+
+    <!-- Price Min -->
+    <div class="col-md-2">
+      <label for="price_min" class="form-label fw-bold"><i class="bi bi-cash me-1"></i>Harga Min</label>
+      <input
+        type="number"
+        class="form-control"
+        id="price_min"
+        name="price_min"
+        placeholder="0"
+        value="{{ price_min|default:'' }}"
+      >
+    </div>
+
+    <!-- Price Max -->
+    <div class="col-md-2">
+      <label for="price_max" class="form-label fw-bold"><i class="bi bi-cash-coin me-1"></i>Harga Max</label>
+      <input
+        type="number"
+        class="form-control"
+        id="price_max"
+        name="price_max"
+        placeholder="1000000"
+        value="{{ price_max|default:'' }}"
+      >
+    </div>
+
+    <!-- Sort Dropdown -->
+    <div class="col-md-2">
+      <label for="sort_by" class="form-label fw-bold"><i class="bi bi-bar-chart me-1"></i>Urutkan</label>
+      <select class="form-select" id="sort_by" name="sort_by">
+        <option value="created_at" {% if sort_by == 'created_at' %}selected{% endif %}>Terbaru</option>
+        <option value="name_asc" {% if sort_by == 'name_asc' %}selected{% endif %}>Nama (A-Z)</option>
+        <option value="name_desc" {% if sort_by == 'name_desc' %}selected{% endif %}>Nama (Z-A)</option>
+        <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Harga (Terendah)</option>
+        <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Harga (Tertinggi)</option>
+      </select>
+    </div>
+
+    <!-- Per Page Dropdown -->
+    <div class="col-md-1">
+      <label for="per_page" class="form-label fw-bold"><i class="bi bi-list-ol me-1"></i>Per Halaman</label>
+      <select class="form-select" id="per_page" name="per_page">
+        <option value="5" {% if per_page == 5 %}selected{% endif %}>5</option>
+        <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+        <option value="20" {% if per_page == 20 %}selected{% endif %}>20</option>
+        <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+      </select>
+    </div>
+
+    <!-- Search & Reset Buttons -->
+    <div class="col-md-2 d-flex gap-2">
+      <button type="submit" class="btn btn-primary rounded-pill shadow-sm flex-fill">
+        <i class="bi bi-search me-1"></i>Cari
+      </button>
+      <a href="{% url 'course_list' %}" class="btn btn-outline-secondary rounded-pill shadow-sm flex-fill">
+        <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
+      </a>
+    </div>
+  </form>
+</div>
+
+<!-- COURSES TABLE SECTION -->
+<div class="bg-white border rounded shadow-sm overflow-hidden">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr>
+          <th scope="col" class="fw-bold" style="width: 5%;">ID</th>
+          <th scope="col" class="fw-bold" style="width: 20%;">Nama Kursus</th>
+          <th scope="col" class="fw-bold" style="width: 25%;">Deskripsi</th>
+          <th scope="col" class="fw-bold" style="width: 10%;">Harga</th>
+          <th scope="col" class="fw-bold" style="width: 12%;">Pengajar</th>
+          <th scope="col" class="fw-bold text-center" style="width: 8%;">Member</th>
+          <th scope="col" class="fw-bold text-center" style="width: 8%;">Konten</th>
+          <th scope="col" class="fw-bold text-center" style="width: 12%;">Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="courseTableBody">
+        <!-- Loading state -->
+        <tr id="loadingRow">
+          <td colspan="8" class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- PAGINATION SECTION -->
+<div class="d-flex justify-content-between align-items-center mt-4" id="paginationContainer" style="display: none;">
+  <div class="text-secondary small" id="paginationInfo">
+  </div>
+  
+  <nav aria-label="Page navigation" class="ms-auto">
+    <ul class="pagination mb-0" id="paginationList">
+    </ul>
+  </nav>
+</div>
+
+<!-- INFO BOX -->
+<div class="alert alert-info mt-4 shadow-sm" role="alert">
+  <div class="d-flex align-items-center">
+    <i class="bi bi-info-circle-fill me-3 fs-3"></i>
+    <div>
+      <h5 class="alert-heading mb-1">Informasi Sistem</h5>
+      <p class="mb-0">Data pada halaman ini diambil melalui REST API SmartLMS. Fitur yang tersedia: <strong>Search</strong>, <strong>Filtering</strong>, <strong>Sorting</strong>, dan <strong>Pagination</strong>. Semua request diproses melalui endpoint <code>/api/v1/courses/</code>. Jika request melebihi batas throttling, sistem akan menampilkan HTTP 429.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const filterForm = document.getElementById('filterForm');
+  const courseTableBody = document.getElementById('courseTableBody');
+  const paginationContainer = document.getElementById('paginationContainer');
+  const paginationInfo = document.getElementById('paginationInfo');
+  const paginationList = document.getElementById('paginationList');
+  const loadingRow = document.getElementById('loadingRow');
+
+  let currentPage = 1;
+  const initialSearch = '{{ search_query|default:""|escapejs }}';
+  const initialSortBy = '{{ sort_by|default:"created_at"|escapejs }}';
+  const initialPriceMin = '{{ price_min|default:""|escapejs }}';
+  const initialPriceMax = '{{ price_max|default:""|escapejs }}';
+  const initialPerPage = '{{ per_page|default:"5"|escapejs }}';
+
+  function truncateText(text, maxWords) {
+    const words = text.split(' ');
+    if (words.length > maxWords) {
+      return words.slice(0, maxWords).join(' ') + '...';
+    }
+    return text;
+  }
+
+  function formatPrice(price) {
+    if (price === 0) {
+      return '<span class="badge bg-success">Gratis</span>';
+    }
+    return 'Rp ' + price.toLocaleString('id-ID', { maximumFractionDigits: 0 });
+  }
+
+  function fetchCourses(page = 1, search = initialSearch, sortBy = initialSortBy, priceMin = initialPriceMin, priceMax = initialPriceMax, perPage = initialPerPage) {
+    courseTableBody.innerHTML = '';
+    courseTableBody.appendChild(loadingRow);
+    paginationContainer.style.display = 'none';
+
+    let url = '/api/v1/courses/?page=' + page + '&page_size=' + perPage;
+    if (search) {
+      url += '&search=' + encodeURIComponent(search);
+    }
+    if (sortBy) {
+      url += '&sort_by=' + encodeURIComponent(sortBy);
+    }
+    if (priceMin) {
+      url += '&price_gte=' + encodeURIComponent(priceMin);
+    }
+    if (priceMax) {
+      url += '&price_lte=' + encodeURIComponent(priceMax);
+    }
+
+    fetch(url)
+      .then(response => {
+        if (!response.ok) {
+          if (response.status === 429) {
+            throw new Error('Terlalu banyak permintaan! Silakan coba lagi nanti.');
+          }
+          throw new Error('Gagal mengambil data kursus');
+        }
+        return response.json();
+      })
+      .then(data => {
+        renderCourses(data.results);
+        renderPagination(data.count, data.page, data.page_size, search, sortBy, priceMin, priceMax, perPage);
+      })
+      .catch(error => {
+        courseTableBody.innerHTML = `
+          <tr>
+            <td colspan="8" class="text-center py-4 text-danger">
+              <i class="bi bi-exclamation-triangle fs-3 d-block mb-2"></i>
+              ${error.message}
+            </td>
+          </tr>
+        `;
+      });
+  }
+
+  function renderCourses(courses) {
+    courseTableBody.innerHTML = '';
+    if (courses.length === 0) {
+      courseTableBody.innerHTML = `
+        <tr>
+          <td colspan="8" class="text-center py-4">
+            <div class="text-secondary">
+              <i class="bi bi-inbox fs-4 d-block mb-2"></i>
+              Tidak ada mata kuliah yang sesuai dengan kriteria pencarian Anda.
+            </div>
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    courses.forEach(course => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td class="text-secondary small">#${course.id}</td>
+        <td class="fw-bold">${course.title}</td>
+        <td class="text-secondary small">${truncateText(course.description, 15)}</td>
+        <td class="fw-bold text-success">${formatPrice(course.price)}</td>
+        <td class="text-secondary small">${course.teacher_username}</td>
+        <td class="text-center">
+          <span class="badge bg-info">${course.member_count}</span>
+        </td>
+        <td class="text-center">
+          <span class="badge bg-warning text-dark">${course.content_count}</span>
+        </td>
+        <td class="text-center">
+          <a href="/courses/${course.id}/" class="btn btn-sm btn-outline-primary rounded-pill shadow-sm">
+            <i class="bi bi-eye me-1"></i>Lihat
+          </a>
+        </td>
+      `;
+      courseTableBody.appendChild(row);
+    });
+  }
+
+  function renderPagination(count, page, pageSize, search, sortBy, priceMin, priceMax, perPage) {
+    paginationContainer.style.display = 'flex';
+    const totalPages = Math.ceil(count / pageSize);
+
+    paginationInfo.innerHTML = `
+      Halaman <strong>${page}</strong> dari <strong>${totalPages}</strong>
+      ${count ? `• Total <strong>${count}</strong> mata kuliah` : ''}
+    `;
+
+    paginationList.innerHTML = '';
+
+    // Previous button
+    if (page > 1) {
+      const prevLi = document.createElement('li');
+      prevLi.className = 'page-item';
+      prevLi.innerHTML = `<a class="page-link" href="#" data-page="${page - 1}"><i class="bi bi-chevron-left"></i> Sebelumnya</a>`;
+      prevLi.querySelector('a').addEventListener('click', (e) => {
+        e.preventDefault();
+        currentPage = page - 1;
+        fetchCourses(page - 1, search, sortBy, priceMin, priceMax, perPage);
+      });
+      paginationList.appendChild(prevLi);
+    } else {
+      const prevLi = document.createElement('li');
+      prevLi.className = 'page-item disabled';
+      prevLi.innerHTML = `<span class="page-link"><i class="bi bi-chevron-left"></i> Sebelumnya</span>`;
+      paginationList.appendChild(prevLi);
+    }
+
+    // Page numbers
+    let startPage = Math.max(1, page - 2);
+    let endPage = Math.min(totalPages, page + 2);
+    if (startPage === 1 && endPage < Math.min(5, totalPages)) {
+      endPage = Math.min(5, totalPages);
+    }
+    if (endPage === totalPages && startPage > Math.max(1, totalPages - 4)) {
+      startPage = Math.max(1, totalPages - 4);
+    }
+
+    if (startPage > 1) {
+      const firstLi = document.createElement('li');
+      firstLi.className = 'page-item';
+      firstLi.innerHTML = `<a class="page-link" href="#" data-page="1">1</a>`;
+      firstLi.querySelector('a').addEventListener('click', (e) => {
+        e.preventDefault();
+        currentPage = 1;
+        fetchCourses(1, search, sortBy, priceMin, priceMax, perPage);
+      });
+      paginationList.appendChild(firstLi);
+      if (startPage > 2) {
+        const ellipsisLi = document.createElement('li');
+        ellipsisLi.className = 'page-item disabled';
+        ellipsisLi.innerHTML = `<span class="page-link">...</span>`;
+        paginationList.appendChild(ellipsisLi);
+      }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      const pageLi = document.createElement('li');
+      pageLi.className = `page-item ${i === page ? 'active' : ''}`;
+      pageLi.innerHTML = `<a class="page-link" href="#" data-page="${i}">${i}</a>`;
+      pageLi.querySelector('a').addEventListener('click', (e) => {
+        e.preventDefault();
+        currentPage = i;
+        fetchCourses(i, search, sortBy, priceMin, priceMax, perPage);
+      });
+      paginationList.appendChild(pageLi);
+    }
+
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) {
+        const ellipsisLi = document.createElement('li');
+        ellipsisLi.className = 'page-item disabled';
+        ellipsisLi.innerHTML = `<span class="page-link">...</span>`;
+        paginationList.appendChild(ellipsisLi);
+      }
+      const lastLi = document.createElement('li');
+      lastLi.className = 'page-item';
+      lastLi.innerHTML = `<a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a>`;
+      lastLi.querySelector('a').addEventListener('click', (e) => {
+        e.preventDefault();
+        currentPage = totalPages;
+        fetchCourses(totalPages, search, sortBy, priceMin, priceMax, perPage);
+      });
+      paginationList.appendChild(lastLi);
+    }
+
+    // Next button
+    if (page < totalPages) {
+      const nextLi = document.createElement('li');
+      nextLi.className = 'page-item';
+      nextLi.innerHTML = `<a class="page-link" href="#" data-page="${page + 1}">Selanjutnya <i class="bi bi-chevron-right"></i></a>`;
+      nextLi.querySelector('a').addEventListener('click', (e) => {
+        e.preventDefault();
+        currentPage = page + 1;
+        fetchCourses(page + 1, search, sortBy, priceMin, priceMax, perPage);
+      });
+      paginationList.appendChild(nextLi);
+    } else {
+      const nextLi = document.createElement('li');
+      nextLi.className = 'page-item disabled';
+      nextLi.innerHTML = `<span class="page-link">Selanjutnya <i class="bi bi-chevron-right"></i></span>`;
+      paginationList.appendChild(nextLi);
+    }
+  }
+
+  filterForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const searchInput = document.getElementById('search');
+    const sortBySelect = document.getElementById('sort_by');
+    const priceMinInput = document.getElementById('price_min');
+    const priceMaxInput = document.getElementById('price_max');
+    const perPageSelect = document.getElementById('per_page');
+    currentPage = 1;
+    fetchCourses(1, searchInput.value, sortBySelect.value, priceMinInput.value, priceMaxInput.value, perPageSelect.value);
+  });
+
+  // Per page change listener
+  document.getElementById('per_page').addEventListener('change', () => {
+    const searchInput = document.getElementById('search');
+    const sortBySelect = document.getElementById('sort_by');
+    const priceMinInput = document.getElementById('price_min');
+    const priceMaxInput = document.getElementById('price_max');
+    const perPageSelect = document.getElementById('per_page');
+    currentPage = 1;
+    fetchCourses(1, searchInput.value, sortBySelect.value, priceMinInput.value, priceMaxInput.value, perPageSelect.value);
+  });
+
+  // Initial fetch
+  fetchCourses();
+});
+</script>
+{% endblock %}

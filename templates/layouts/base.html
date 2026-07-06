@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Smart LMS{% endblock %}</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+      :root {
+        --primary: #7ccbff;
+        --primary-dark: #3aa8f2;
+        --primary-light: #eef8ff;
+        --background: #f4f9fc;
+        --card: #ffffff;
+        --border: #e3effa;
+        --text: #2e4459;
+        --muted: #7e95ad;
+        --shadow: 0 8px 30px rgba(180, 205, 230, 0.15);
+      }
+
+      body {
+        background: var(--background);
+        color: var(--text);
+        font-family: "Inter", sans-serif;
+      }
+
+      .navbar {
+        background: #ffffff !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        border-bottom: 1px solid var(--border);
+        padding: 15px 0;
+      }
+
+      .navbar-brand {
+        font-weight: 700;
+        color: var(--primary-dark) !important;
+        font-size: 22px;
+        letter-spacing: -0.5px;
+      }
+
+      .nav-link {
+        color: #4b5e71 !important;
+        font-weight: 500;
+        margin-left: 15px;
+        transition: all 0.2s ease;
+        font-size: 14.5px;
+        display: flex;
+        align-items: center;
+        border-radius: 8px;
+        padding: 8px 12px;
+      }
+
+      .nav-link:hover, .nav-link.active {
+        color: var(--primary-dark) !important;
+        background-color: var(--primary-light);
+      }
+
+      .nav-link.active {
+        font-weight: 600;
+      }
+
+      .card {
+        background: white !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 14px;
+        box-shadow: var(--shadow);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .card:hover {
+        box-shadow: 0 12px 35px rgba(180, 205, 230, 0.25);
+      }
+
+      .list-group-item {
+        background: white !important;
+        border: 1px solid var(--border) !important;
+        padding: 15px 20px;
+      }
+
+      .btn-primary {
+        background: var(--primary-dark) !important;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 18px;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.2s ease;
+      }
+
+      .btn-primary:hover {
+        background: #2596e0 !important;
+        transform: translateY(-1px);
+      }
+
+      .btn-outline-secondary {
+        border-radius: 8px;
+        border-color: var(--border);
+        color: var(--text);
+        font-weight: 500;
+        font-size: 14px;
+      }
+
+      .btn-outline-secondary:hover {
+        background-color: var(--primary-light);
+        color: var(--primary-dark);
+        border-color: var(--primary);
+      }
+
+      .badge {
+        background: var(--primary-light) !important;
+        color: var(--primary-dark) !important;
+        font-weight: 600;
+        padding: 6px 12px;
+        border-radius: 6px;
+      }
+
+      .display-6 {
+        color: var(--primary-dark) !important;
+        font-weight: 700;
+      }
+
+      a {
+        text-decoration: none;
+        color: var(--primary-dark);
+      }
+
+      .dropdown-menu {
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        padding: 8px;
+      }
+
+      .dropdown-item {
+        border-radius: 6px;
+        font-size: 14px;
+        padding: 8px 16px;
+        color: var(--text);
+      }
+
+      .dropdown-item:hover {
+        background-color: var(--primary-light);
+        color: var(--primary-dark);
+      }
+
+      .alert {
+        border-radius: 10px;
+        border: 1px solid var(--border);
+      }
+
+      main {
+        padding-top: 20px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <nav class="navbar navbar-expand-lg mb-4">
+      <div class="container">
+        <a class="navbar-brand fw-bold" href="{% url 'core' %}">
+          <i class="bi bi-mortarboard-fill me-2"></i>SmartLMS
+        </a>
+
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navMenu"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navMenu">
+          <div class="navbar-nav ms-auto align-items-center">
+            <a class="nav-link" href="{% url 'core' %}" data-nav="core">
+              <i class="bi bi-house-door me-1"></i>Home
+            </a>
+            <a class="nav-link" href="{% url 'course_list' %}" data-nav="courses">
+              <i class="bi bi-book me-1"></i>Courses
+            </a>
+            <a class="nav-link" href="/api/docs" target="_blank" data-nav="api">
+              <i class="bi bi-file-earmark-code me-1"></i>API Docs
+            </a>
+
+            {% if user.is_authenticated %}
+            <a class="nav-link" href="{% url 'dashboard' %}" data-nav="dashboard">
+              <i class="bi bi-grid me-1"></i>Dashboard
+            </a>
+            <a class="nav-link" href="{% url 'my_courses' %}" data-nav="my-courses">
+              <i class="bi bi-journal-bookmark me-1"></i>My Courses
+            </a>
+
+            <div class="nav-item dropdown ms-2">
+              <a
+                class="nav-link dropdown-toggle fw-semibold text-primary"
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+              >
+                <i class="bi bi-person-circle me-1"></i>{{ user.username }}
+              </a>
+
+              <ul class="dropdown-menu dropdown-menu-end">
+                {% if user.is_staff %}
+                <li>
+                  <a class="dropdown-item" href="/admin/">
+                    <i class="bi bi-sliders me-2"></i>Admin Panel
+                  </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                {% endif %}
+
+                <li>
+                  <form action="{% url 'logout' %}" method="post" class="m-0 p-0">
+                    {% csrf_token %}
+                    <button type="submit" class="dropdown-item text-danger d-flex align-items-center w-100 border-0 bg-transparent">
+                      <i class="bi bi-box-arrow-right me-2"></i>Logout
+                    </button>
+                  </form>
+                </li>
+              </ul>
+            </div>
+            {% else %}
+            <a class="nav-link btn btn-outline-secondary px-3 py-1 ms-3" href="{% url 'login' %}?next={{ request.path }}">
+              <i class="bi bi-box-arrow-in-right me-1"></i>Login
+            </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main class="container pb-5">
+      {% if messages %} {% for message in messages %}
+      <div class="alert alert-{{ message.tags|default:'info' }} mb-3">
+        {{ message }}
+      </div>
+      {% endfor %} {% endif %} {% block content %}{% endblock %}
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const path = window.location.pathname;
+        const navLinks = document.querySelectorAll('.nav-link[data-nav]');
+        
+        navLinks.forEach(link => {
+          const navName = link.getAttribute('data-nav');
+          let isActive = false;
+          
+          if (navName === 'core' && (path === '/' || path === '')) {
+            isActive = true;
+          } else if (navName === 'courses' && path.startsWith('/courses')) {
+            isActive = true;
+          } else if (navName === 'dashboard' && path === '/dashboard/') {
+            isActive = true;
+          } else if (navName === 'my-courses' && path === '/my-courses/') {
+            isActive = true;
+          } else if (navName === 'api' && path.startsWith('/api')) {
+            isActive = true;
+          }
+          
+          if (isActive) {
+            link.classList.add('active');
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

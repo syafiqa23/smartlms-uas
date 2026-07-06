@@ -1,0 +1,109 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Login - SmartLMS{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+  <div class="col-md-6 col-lg-5">
+    <div class="bg-white border rounded shadow-lg p-5">
+      <div class="text-center mb-4">
+        <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 rounded-circle p-4 mb-3">
+          <i class="bi bi-mortarboard-fill text-primary fs-1"></i>
+        </div>
+        <h1 class="h3 fw-bold mb-2">Login SmartLMS</h1>
+        <p class="text-secondary">Selamat datang kembali! Masuk ke akun Anda.</p>
+      </div>
+
+      {% if form.errors %}
+        <div class="alert alert-danger d-flex align-items-center">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          <div>Username atau password tidak sesuai.</div>
+        </div>
+      {% endif %}
+
+      <form method="post">
+        {% csrf_token %}
+        {% if next %}
+          <input type="hidden" name="next" value="{{ next }}">
+        {% endif %}
+        
+        <div class="mb-4">
+          <label class="form-label fw-semibold text-dark" for="id_username">
+            Username
+          </label>
+          <div class="input-group">
+            <span class="input-group-text bg-primary bg-opacity-10 border-0 rounded-start-pill">
+              <i class="bi bi-person-fill text-primary"></i>
+            </span>
+            <input
+              type="text"
+              name="username"
+              autofocus
+              autocapitalize="none"
+              autocomplete="username"
+              maxlength="150"
+              class="form-control border-start-0 border-end-0 ps-2"
+              required
+              id="id_username"
+              placeholder="Masukkan username Anda"
+            >
+            <span class="input-group-text bg-white border-start-0 rounded-end-pill"></span>
+          </div>
+        </div>
+        
+        <div class="mb-4">
+          <label class="form-label fw-semibold text-dark" for="id_password">
+            Password
+          </label>
+          <div class="input-group">
+            <span class="input-group-text bg-primary bg-opacity-10 border-0 rounded-start-pill">
+              <i class="bi bi-lock-fill text-primary"></i>
+            </span>
+            <input
+              type="password"
+              name="password"
+              autocomplete="current-password"
+              class="form-control border-start-0 border-end-0 ps-2"
+              required
+              id="id_password"
+              placeholder="Masukkan password Anda"
+            >
+            <button type="button" class="input-group-text bg-white border-start-0 rounded-end-pill" id="togglePassword">
+              <i class="bi bi-eye-slash text-secondary" id="eyeIcon"></i>
+            </button>
+          </div>
+        </div>
+        
+        <button class="btn btn-primary w-100 rounded-pill py-3 fw-semibold shadow-sm" type="submit">
+          <i class="bi bi-box-arrow-in-right me-2"></i> Login SmartLMS
+        </button>
+      </form>
+      
+      <div class="mt-4 pt-4 border-top text-center">
+        <p class="text-secondary small mb-0">
+          Lupa password? Hubungi administrator.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Toggle password visibility
+  const togglePassword = document.getElementById('togglePassword');
+  const passwordInput = document.getElementById('id_password');
+  const eyeIcon = document.getElementById('eyeIcon');
+
+  togglePassword.addEventListener('click', function () {
+    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    passwordInput.setAttribute('type', type);
+    
+    if (type === 'text') {
+      eyeIcon.classList.remove('bi-eye-slash');
+      eyeIcon.classList.add('bi-eye');
+    } else {
+      eyeIcon.classList.remove('bi-eye');
+      eyeIcon.classList.add('bi-eye-slash');
+    }
+  });
+</script>
+{% endblock %}

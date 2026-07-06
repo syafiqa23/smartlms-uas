@@ -1,0 +1,45 @@
+{% extends 'layouts/base.html' %}
+{% block title %}Kursus Saya - SmartLMS{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">Kursus Saya</h1>
+<div class="list-group bg-white shadow-sm">
+  {% for m in memberships %}
+    <div class="list-group-item py-4">
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+          <h5 class="mb-1 fw-bold text-dark">
+            <i class="bi bi-book me-2 text-primary"></i>{{ m.course.title }}
+          </h5>
+          <div class="small text-secondary">
+            <i class="bi bi-person-fill me-1"></i>Pengajar: {{ m.course.teacher.username }}
+          </div>
+        </div>
+        <span class="badge bg-primary">{{ m.get_role_display }}</span>
+      </div>
+      
+      <div class="d-flex justify-content-between align-items-center">
+        <span class="badge bg-info">
+          <i class="bi bi-folder2-open me-1"></i>{{ m.course.contents.count }} Konten
+        </span>
+        <div class="d-flex gap-2">
+          <a href="{% url 'course_content_list' m.course.id %}" class="btn btn-primary rounded-pill shadow-sm px-4">
+            <i class="bi bi-play-circle me-2"></i>Lanjutkan Belajar
+          </a>
+          <a href="{% url 'course_detail' m.course.id %}" class="btn btn-outline-secondary rounded-pill shadow-sm px-4">
+            <i class="bi bi-eye me-2"></i>Detail Kursus
+          </a>
+        </div>
+      </div>
+    </div>
+  {% empty %}
+    <div class="list-group-item text-secondary py-5 text-center">
+      <i class="bi bi-journal-x fs-1 mb-3 d-block text-muted"></i>
+      <h5 class="text-muted">Belum mengikuti kursus apapun</h5>
+      <p class="small">Jelajahi daftar kursus dan bergabunglah dengan kursus yang Anda minati!</p>
+      <a href="{% url 'course_list' %}" class="btn btn-primary rounded-pill shadow-sm mt-2">
+        <i class="bi bi-search me-2"></i>Jelajahi Kursus
+      </a>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}
