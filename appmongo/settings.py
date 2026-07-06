@@ -149,7 +149,11 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_DIRS = [BASE_DIR / "static"]
+
+# Hanya gunakan STATICFILES_DIRS jika folder static memang ada
+STATIC_DIR = BASE_DIR / "static"
+if STATIC_DIR.exists():
+    STATICFILES_DIRS = [STATIC_DIR]
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
