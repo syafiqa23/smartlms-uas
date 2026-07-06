@@ -8,7 +8,7 @@ from .api import api
 from .views import home
 
 urlpatterns = [
-    path("", home, name="home"),
+    path("", home, name="home"), 
     path("", include("appmongo.frontend_urls")),
     path("api/v1/", api.urls),
     path("api/docs", RedirectView.as_view(url="/api/v1/docs", permanent=False)),
