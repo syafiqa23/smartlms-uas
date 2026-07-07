@@ -1,0 +1,5 @@
+title,category,price,description,status,teacher_username
+Kursus Bahasa Inggris untuk Pemula,Language,0,Kursus bahasa Inggris dasar untuk pemula,published,budi_guru
+Kursus Fotografi Dasar,Photography,120000,Kursus fotografi untuk pemula,published,siti_guru
+Kursus Video Editing dengan Premiere Pro,Multimedia,180000,Kursus editing video menggunakan Adobe Premiere Pro,draft,budi_guru
+Kursus Public Speaking,Communication,95000,Kursus meningkatkan kemampuan berbicara di depan umum,published,siti_guru

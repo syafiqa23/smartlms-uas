@@ -1,13 +1,17 @@
+import csv
+import io
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from apps.comments.models import Comment
 from apps.contents.forms import CourseContentForm
 from apps.contents.models import CourseContent
+from apps.courses.forms import CourseForm
 from apps.courses.models import Course
 from apps.members.models import CourseMember, Enrollment
 
@@ -322,4 +326,219 @@ def edit_content(request, content_id):
             "content": content,
             "active": "courses",
         },
+    )
+
+
+@login_required
+def create_course(request):
+    if request.user.role != User.Role.TEACHER:
+        messages.error(request, "Anda tidak memiliki izin untuk membuat kursus.")
+        return redirect("course_list")
+    
+    if request.method == "POST":
+        form = CourseForm(request.POST, request.FILES)
+        if form.is_valid():
+            course = form.save(commit=False)
+            course.teacher = request.user
+            course.save()
+            # Add teacher as member
+            CourseMember.objects.get_or_create(
+                course=course,
+                user=request.user,
+                defaults={"role": CourseMember.Role.TEACHER},
+            )
+            messages.success(request, "Kursus berhasil dibuat!")
+            return redirect("course_detail", course_id=course.id)
+    else:
+        form = CourseForm()
+    
+    return render(
+        request,
+        "courses/create_course.html",
+        {"form": form, "active": "courses"},
+    )
+
+
+@login_required
+def edit_course(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+    
+    if not (request.user == course.teacher or request.user.role == User.Role.ADMIN):
+        messages.error(request, "Anda tidak memiliki izin untuk mengedit kursus ini.")
+        return redirect("course_detail", course_id=course.id)
+    
+    if request.method == "POST":
+        form = CourseForm(request.POST, request.FILES, instance=course)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Kursus berhasil diperbarui!")
+            return redirect("course_detail", course_id=course.id)
+    else:
+        form = CourseForm(instance=course)
+    
+    return render(
+        request,
+        "courses/edit_course.html",
+        {"form": form, "course": course, "active": "courses"},
+    )
+
+
+@login_required
+def delete_course(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+    
+    if not (request.user == course.teacher or request.user.role == User.Role.ADMIN):
+        messages.error(request, "Anda tidak memiliki izin untuk menghapus kursus ini.")
+        return redirect("course_detail", course_id=course.id)
+    
+    if request.method == "POST":
+        course.delete()
+        messages.success(request, "Kursus berhasil dihapus!")
+        return redirect("course_list")
+    
+    return render(
+        request,
+        "courses/delete_course.html",
+        {"course": course, "active": "courses"},
+    )
+
+
+@login_required
+def add_content(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+    
+    if not (request.user == course.teacher or request.user.role == User.Role.ADMIN):
+        messages.error(request, "Anda tidak memiliki izin untuk menambah konten.")
+        return redirect("course_content_list", course_id=course.id)
+    
+    if request.method == "POST":
+        form = CourseContentForm(request.POST, request.FILES)
+        if form.is_valid():
+            content = form.save(commit=False)
+            content.course = course
+            content.save()
+            messages.success(request, "Konten berhasil ditambahkan!")
+            return redirect("course_content_list", course_id=course.id)
+    else:
+        form = CourseContentForm()
+    
+    return render(
+        request,
+        "contents/add_content.html",
+        {"form": form, "course": course, "active": "courses"},
+    )
+
+
+@login_required
+def delete_content(request, content_id):
+    content = get_object_or_404(CourseContent, id=content_id)
+    course = content.course
+    
+    if not (request.user == course.teacher or request.user.role == User.Role.ADMIN):
+        messages.error(request, "Anda tidak memiliki izin untuk menghapus konten ini.")
+        return redirect("course_content_detail", content_id=content.id)
+    
+    if request.method == "POST":
+        content.delete()
+        messages.success(request, "Konten berhasil dihapus!")
+        return redirect("course_content_list", course_id=course.id)
+    
+    return render(
+        request,
+        "contents/delete_content.html",
+        {"content": content, "course": course, "active": "courses"},
+    )
+
+
+@login_required
+def download_csv_template(request):
+    if request.user.role != User.Role.TEACHER:
+        messages.error(request, "Anda tidak memiliki izin.")
+        return redirect("dashboard")
+    
+    # Create CSV file in memory
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    # Write header row
+    writer.writerow(["title", "category", "price", "description", "status"])
+    
+    # Write example data
+    writer.writerow(["Pemrograman Python Dasar", "Programming", 50000, "Kursus dasar pemrograman Python untuk pemula", "published"])
+    
+    # Create response
+    output.seek(0)
+    response = HttpResponse(output, content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="template_kursus.csv"'
+    
+    return response
+
+
+@login_required
+def import_csv(request):
+    if request.user.role != User.Role.TEACHER:
+        messages.error(request, "Anda tidak memiliki izin.")
+        return redirect("dashboard")
+    
+    if request.method == "POST":
+        csv_file = request.FILES.get("csv_file")
+        
+        if not csv_file:
+            messages.error(request, "Silakan pilih file CSV terlebih dahulu.")
+            return redirect("import_csv")
+        
+        if not csv_file.name.endswith('.csv'):
+            messages.error(request, "File harus berformat CSV.")
+            return redirect("import_csv")
+        
+        try:
+            # Read CSV file
+            decoded_file = csv_file.read().decode('utf-8')
+            io_string = io.StringIO(decoded_file)
+            reader = csv.DictReader(io_string)
+            
+            success_count = 0
+            error_count = 0
+            
+            for row in reader:
+                try:
+                    # Always use request.user as teacher
+                    teacher = request.user
+                    
+                    # Create course
+                    course = Course.objects.create(
+                        title=row.get("title", ""),
+                        category=row.get("category", ""),
+                        price=int(row.get("price", 0)),
+                        description=row.get("description", ""),
+                        status=row.get("status", "draft"),
+                        teacher=teacher
+                    )
+                    
+                    # Add teacher as member
+                    CourseMember.objects.get_or_create(
+                        course=course,
+                        user=teacher,
+                        defaults={"role": CourseMember.Role.TEACHER}
+                    )
+                    
+                    success_count += 1
+                except Exception:
+                    error_count += 1
+            
+            if success_count > 0:
+                messages.success(request, f"Berhasil mengimport {success_count} kursus!")
+            if error_count > 0:
+                messages.warning(request, f"Gagal mengimport {error_count} baris data.")
+            
+            return redirect("course_list")
+        
+        except Exception as e:
+            messages.error(request, f"Terjadi kesalahan saat mengimport file: {str(e)}")
+            return redirect("import_csv")
+    
+    return render(
+        request,
+        "courses/import_csv.html",
+        {"active": "dashboard"},
     )

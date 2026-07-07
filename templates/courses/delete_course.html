@@ -1,0 +1,23 @@
+{% extends "layouts/base.html" %}
+{% block title %}Hapus Kursus - {{ course.title }} - Smart LMS{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-header bg-white border-0 pb-0">
+        <h4 class="fw-bold mb-0 text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Hapus Kursus</h4>
+      </div>
+      <div class="card-body">
+        <p class="lead">Anda yakin ingin menghapus kursus <strong class="text-primary">{{ course.title }}</strong>? Tindakan ini tidak bisa dibatalkan.</p>
+        <form method="post">
+          {% csrf_token %}
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-2"></i>Ya, Hapus</button>
+            <a href="{% url 'course_detail' course_id=course.id %}" class="btn btn-outline-secondary"><i class="bi bi-x-circle me-2"></i>Batal</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

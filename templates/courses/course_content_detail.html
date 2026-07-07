@@ -2,77 +2,97 @@
 {% block title %}{{ content.title }} - SmartLMS{% endblock %}
 {% block content %}
 
-<div class="bg-white border rounded shadow-sm p-4 mb-4">
-  <div class="d-flex justify-content-between align-items-start mb-3">
+<div class="bg-white border rounded-4 shadow-sm p-5 mb-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-start mb-4 gap-3">
     <div>
-      <a class="small text-secondary" href="{% url 'course_detail' content.course.id %}">
-        <i class="bi bi-arrow-left me-1"></i>Kembali ke {{ content.course.title }}
+      <a class="small text-secondary mb-2 d-inline-flex align-items-center" href="{% url 'course_content_list' content.course.id %}">
+        <i class="bi bi-arrow-left me-2"></i>Kembali ke Daftar Konten
       </a>
       <h1 class="h3 mt-2">{{ content.title }}</h1>
     </div>
     {% if can_assist %}
-      <a href="{% url 'edit_content' content.id %}" class="btn btn-warning rounded-pill shadow-sm">
-        <i class="bi bi-pencil-square me-1"></i>Edit Konten
-      </a>
+      <div class="d-flex gap-2">
+        <a href="{% url 'edit_content' content.id %}" class="btn btn-outline-primary rounded-pill shadow-sm px-4 py-2">
+          <i class="bi bi-pencil-square me-2"></i>Edit Konten
+        </a>
+        <a href="{% url 'delete_content' content.id %}" class="btn btn-outline-danger rounded-pill shadow-sm px-4 py-2">
+          <i class="bi bi-trash me-2"></i>Hapus Konten
+        </a>
+      </div>
     {% endif %}
   </div>
   
-  <p class="text-secondary">{{ content.description }}</p>
+  <p class="text-secondary mb-4">{{ content.description }}</p>
 
   {% if content.video_url %}
-    <div class="mb-2">
-      <i class="bi bi-play-circle me-1 text-primary"></i>
-      <strong>Video:</strong> <a href="{{ content.video_url }}" class="text-decoration-none">{{ content.video_url }}</a>
+    <div class="mb-3 p-4 bg-light rounded-3">
+      <div class="d-flex align-items-center mb-2">
+        <i class="bi bi-play-circle me-3 text-primary fs-3"></i>
+        <strong class="text-dark">Video Pembelajaran</strong>
+      </div>
+      <a href="{{ content.video_url }}" target="_blank" class="text-decoration-none text-primary">
+        <i class="bi bi-link-45deg me-2"></i>{{ content.video_url }}
+      </a>
     </div>
   {% endif %}
 
   {% if content.attachment %}
-    <div>
-      <i class="bi bi-file-earmark me-1 text-success"></i>
-      <strong>File:</strong> <a href="{{ content.attachment.url }}" class="text-decoration-none"><i class="bi bi-download me-1"></i>Unduh materi</a>
+    <div class="p-4 bg-light rounded-3">
+      <div class="d-flex align-items-center mb-2">
+        <i class="bi bi-file-earmark-arrow-down me-3 text-success fs-3"></i>
+        <strong class="text-dark">File Materi</strong>
+      </div>
+      <a href="{{ content.attachment.url }}" class="text-decoration-none text-success">
+        <i class="bi bi-download me-2"></i>Unduh File
+      </a>
     </div>
   {% endif %}
 </div>
 
-<div class="bg-white border rounded shadow-sm p-4">
-  <h2 class="h5 mb-3">Komentar</h2>
+<div class="bg-white border rounded-4 shadow-sm p-5">
+  <h2 class="h5 mb-4 fw-semibold">
+    <i class="bi bi-chat-dots me-2"></i>Komentar
+  </h2>
 
-  <div class="list-group mb-4">
+  <div class="list-group list-group-flush mb-4">
     {% for k in comments %}
-      <div class="list-group-item">
-        <div class="d-flex justify-content-between">
-          <strong>{{ k.user.username }}</strong>
+      <div class="list-group-item border-0 py-3 px-0">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-person-circle text-secondary"></i>
+            <strong class="text-dark">{{ k.user.username }}</strong>
+          </div>
           <small class="text-secondary">
             {{ k.created_at|date:"d M Y H:i" }}
           </small>
         </div>
-        <div>{{ k.text }}</div>
+        <div class="text-muted">{{ k.text }}</div>
       </div>
     {% empty %}
-      <div class="list-group-item text-secondary">
-        Belum ada komentar.
+      <div class="text-center py-5 text-secondary">
+        <i class="bi bi-chat-square-text fs-1 mb-3"></i>
+        <p class="mb-0">Belum ada komentar.</p>
       </div>
     {% endfor %}
   </div>
 
   {% if can_view %}
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h3 class="h6 mb-0">Tambah Komentar Baru</h3>
-      <a href="{% url 'add_comment' content.id %}" class="btn btn-primary rounded-pill shadow-sm btn-sm">
-        <i class="bi bi-plus-circle me-1"></i>Tulis Komentar
+    <div class="d-flex justify-content-between align-items-center">
+      <h3 class="h6 mb-0 text-muted">Tambah Komentar Baru</h3>
+      <a href="{% url 'add_comment' content.id %}" class="btn btn-primary rounded-pill shadow-sm px-4 py-2">
+        <i class="bi bi-plus-circle me-2"></i>Tulis Komentar
       </a>
     </div>
   {% elif user.is_authenticated %}
-    <div class="alert alert-warning">
-      Anda harus bergabung dengan course untuk bisa berkomentar.
-      <br>
-      <a href="{% url 'join_course' content.course.id %}" class="btn btn-sm btn-primary mt-2">
-        Join Course
+    <div class="alert alert-warning rounded-4">
+      <p class="mb-2">Anda harus bergabung dengan course untuk bisa berkomentar.</p>
+      <a href="{% url 'join_course' content.course.id %}" class="btn btn-primary rounded-pill shadow-sm px-4 py-2 mt-2">
+        <i class="bi bi-person-plus me-2"></i>Join Course
       </a>
     </div>
   {% else %}
-    <p class="mb-0">
-      <a href="{% url 'login' %}?next={{ request.path }}">Login</a> untuk berkomentar.
+    <p class="mb-0 text-muted">
+      <i class="bi bi-box-arrow-in-right me-2"></i><a href="{% url 'login' %}?next={{ request.path }}">Login</a> untuk berkomentar.
     </p>
   {% endif %}
 </div>

@@ -9,9 +9,18 @@
       Daftar materi, video, file, dan submateri untuk mata kuliah ini.
     </p>
   </div>
-  <a class="btn btn-outline-secondary rounded-pill shadow-sm" href="{% url 'course_detail' course.id %}">
-    <i class="bi bi-arrow-left me-1"></i>Kembali
-  </a>
+  <div class="d-flex gap-2">
+    {% if user.is_authenticated %}
+      {% if course.teacher == user or user.role == 'ADMIN' %}
+        <a class="btn btn-primary rounded-pill shadow-sm" href="{% url 'add_content' course.id %}">
+          <i class="bi bi-plus-circle me-1"></i>Tambah Konten
+        </a>
+      {% endif %}
+    {% endif %}
+    <a class="btn btn-outline-secondary rounded-pill shadow-sm" href="{% url 'course_detail' course.id %}">
+      <i class="bi bi-arrow-left me-1"></i>Kembali
+    </a>
+  </div>
 </div>
 
 {% if can_view %}

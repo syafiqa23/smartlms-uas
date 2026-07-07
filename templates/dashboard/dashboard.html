@@ -2,90 +2,103 @@
 {% block title %}Dashboard - SmartLMS{% endblock %}
 {% block content %}
 
-<h1 class="h3 mb-4">Dashboard</h1>
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <h1 class="h3 mb-0">Dashboard</h1>
+        
+        {% if user.role == 'teacher' %}
+            <div class="d-flex gap-2">
+                <a href="{% url 'create_course' %}" class="btn btn-primary rounded-pill shadow-sm px-4 py-2">
+                    <i class="bi bi-plus-circle me-2"></i>Buat Kursus Baru
+                </a>
+                <a href="{% url 'import_csv' %}" class="btn btn-outline-primary rounded-pill shadow-sm px-4 py-2">
+                    <i class="bi bi-upload me-2"></i>Import CSV
+                </a>
+            </div>
+        {% endif %}
+    </div>
 
 <!-- Role-based Statistics Cards -->
 <div class="row g-4 mb-4">
 
   {% if user_role == 'admin' %}
     <div class="col-md-4">
-      <div class="card p-3 shadow-sm">
-        <h6 class="text-muted mb-2">Total User</h6>
-        <div class="display-6">{{ stats.total_users }}</div>
+      <div class="card border-0 p-4 rounded-4 shadow-sm">
+        <h6 class="text-muted mb-2"><i class="bi bi-people me-2"></i>Total User</h6>
+        <div class="display-6 text-primary">{{ stats.total_users }}</div>
       </div>
     </div>
     <div class="col-md-4">
-      <div class="card p-3 shadow-sm">
-        <h6 class="text-muted mb-2">Total Guru</h6>
-        <div class="display-6">{{ stats.total_teachers }}</div>
+      <div class="card border-0 p-4 rounded-4 shadow-sm">
+        <h6 class="text-muted mb-2"><i class="bi bi-person-badge me-2"></i>Total Guru</h6>
+        <div class="display-6 text-success">{{ stats.total_teachers }}</div>
       </div>
     </div>
     <div class="col-md-4">
-      <div class="card p-3 shadow-sm">
-        <h6 class="text-muted mb-2">Total Siswa</h6>
-        <div class="display-6">{{ stats.total_students }}</div>
+      <div class="card border-0 p-4 rounded-4 shadow-sm">
+        <h6 class="text-muted mb-2"><i class="bi bi-mortarboard me-2"></i>Total Siswa</h6>
+        <div class="display-6 text-info">{{ stats.total_students }}</div>
       </div>
     </div>
     <div class="col-md-4">
-      <div class="card p-3 shadow-sm">
-        <h6 class="text-muted mb-2">Total Kursus</h6>
-        <div class="display-6">{{ stats.total_courses }}</div>
+      <div class="card border-0 p-4 rounded-4 shadow-sm">
+        <h6 class="text-muted mb-2"><i class="bi bi-book me-2"></i>Total Kursus</h6>
+        <div class="display-6 text-warning">{{ stats.total_courses }}</div>
       </div>
     </div>
     <div class="col-md-4">
-      <div class="card p-3 shadow-sm">
-        <h6 class="text-muted mb-2">Total Konten</h6>
-        <div class="display-6">{{ stats.total_contents }}</div>
+      <div class="card border-0 p-4 rounded-4 shadow-sm">
+        <h6 class="text-muted mb-2"><i class="bi bi-files me-2"></i>Total Konten</h6>
+        <div class="display-6 text-secondary">{{ stats.total_contents }}</div>
       </div>
     </div>
     <div class="col-md-4">
-      <div class="card p-3 shadow-sm">
-        <h6 class="text-muted mb-2">Total Komentar</h6>
-        <div class="display-6">{{ stats.total_comments }}</div>
+      <div class="card border-0 p-4 rounded-4 shadow-sm">
+        <h6 class="text-muted mb-2"><i class="bi bi-chat-dots me-2"></i>Total Komentar</h6>
+        <div class="display-6 text-danger">{{ stats.total_comments }}</div>
       </div>
     </div>
   {% elif user_role == 'teacher' %}
     <div class="col-md-4">
-      <div class="card p-3 shadow-sm">
-        <h6 class="text-muted mb-2">Total Kursus</h6>
-        <div class="display-6">{{ stats.total_courses }}</div>
+      <div class="card border-0 p-4 rounded-4 shadow-sm">
+        <h6 class="text-muted mb-2"><i class="bi bi-book me-2"></i>Total Kursus</h6>
+        <div class="display-6 text-primary">{{ stats.total_courses }}</div>
       </div>
     </div>
     <div class="col-md-4">
-      <div class="card p-3 shadow-sm">
-        <h6 class="text-muted mb-2">Total Siswa</h6>
-        <div class="display-6">{{ stats.total_students }}</div>
+      <div class="card border-0 p-4 rounded-4 shadow-sm">
+        <h6 class="text-muted mb-2"><i class="bi bi-mortarboard me-2"></i>Total Siswa</h6>
+        <div class="display-6 text-success">{{ stats.total_students }}</div>
       </div>
     </div>
     <div class="col-md-4">
-      <div class="card p-3 shadow-sm">
-        <h6 class="text-muted mb-2">Total Konten</h6>
-        <div class="display-6">{{ stats.total_contents }}</div>
+      <div class="card border-0 p-4 rounded-4 shadow-sm">
+        <h6 class="text-muted mb-2"><i class="bi bi-files me-2"></i>Total Konten</h6>
+        <div class="display-6 text-info">{{ stats.total_contents }}</div>
       </div>
     </div>
     <div class="col-md-4">
-      <div class="card p-3 shadow-sm">
-        <h6 class="text-muted mb-2">Total Komentar</h6>
-        <div class="display-6">{{ stats.total_comments }}</div>
+      <div class="card border-0 p-4 rounded-4 shadow-sm">
+        <h6 class="text-muted mb-2"><i class="bi bi-chat-dots me-2"></i>Total Komentar</h6>
+        <div class="display-6 text-warning">{{ stats.total_comments }}</div>
       </div>
     </div>
   {% else %}
     <div class="col-md-4">
-      <div class="card p-3 shadow-sm">
-        <h6 class="text-muted mb-2">Kursus Saya</h6>
-        <div class="display-6">{{ stats.total_courses }}</div>
+      <div class="card border-0 p-4 rounded-4 shadow-sm">
+        <h6 class="text-muted mb-2"><i class="bi bi-book me-2"></i>Kursus Saya</h6>
+        <div class="display-6 text-primary">{{ stats.total_courses }}</div>
       </div>
     </div>
     <div class="col-md-4">
-      <div class="card p-3 shadow-sm">
-        <h6 class="text-muted mb-2">Komentar Saya</h6>
-        <div class="display-6">{{ stats.total_comments }}</div>
+      <div class="card border-0 p-4 rounded-4 shadow-sm">
+        <h6 class="text-muted mb-2"><i class="bi bi-chat-dots me-2"></i>Komentar Saya</h6>
+        <div class="display-6 text-success">{{ stats.total_comments }}</div>
       </div>
     </div>
     <div class="col-md-4">
-      <div class="card p-3 shadow-sm">
-        <h6 class="text-muted mb-2">Kursus Aktif</h6>
-        <div class="display-6">{{ stats.active_courses }}</div>
+      <div class="card border-0 p-4 rounded-4 shadow-sm">
+        <h6 class="text-muted mb-2"><i class="bi bi-check-circle me-2"></i>Kursus Aktif</h6>
+        <div class="display-6 text-info">{{ stats.active_courses }}</div>
       </div>
     </div>
   {% endif %}
@@ -93,20 +106,27 @@
 </div>
 
 <!-- My Courses -->
-<div class="bg-white p-4 rounded shadow-sm">
-  <h4 class="mb-3">Kursus Saya</h4>
-  <ul class="list-group">
+<div class="bg-white border-0 p-5 rounded-4 shadow-sm">
+  <h4 class="mb-4 fw-semibold"><i class="bi bi-collection me-2"></i>Kursus Saya</h4>
+  <div class="list-group list-group-flush">
     {% for c in courses %}
-      <li class="list-group-item d-flex justify-content-between align-items-center">
-        <span>{{ c.course.title }}</span>
-        <span class="badge bg-primary">{{ c.get_role_display }}</span>
-      </li>
+      <a href="{% url 'course_detail' c.course.id %}" class="list-group-item border-0 py-3 d-flex justify-content-between align-items-center hover:bg-light rounded-3 mb-1 transition">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-book text-primary"></i>
+          <span class="text-dark">{{ c.course.title }}</span>
+        </div>
+        <span class="badge bg-primary rounded-pill px-3 py-1">{{ c.get_role_display }}</span>
+      </a>
     {% empty %}
-      <li class="list-group-item text-muted text-center py-4">
-        Belum mengikuti kursus
-      </li>
+      <div class="text-center py-5 text-secondary">
+        <i class="bi bi-inbox fs-1 mb-3"></i>
+        <p class="mb-2">Belum mengikuti kursus</p>
+        <a href="{% url 'course_list' %}" class="btn btn-primary rounded-pill shadow-sm px-4 py-2 mt-2">
+          <i class="bi bi-search me-2"></i>Jelajahi Kursus
+        </a>
+      </div>
     {% endfor %}
-  </ul>
+  </div>
 </div>
 
 {% endblock %}

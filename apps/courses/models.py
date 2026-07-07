@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.core.validators import MinLengthValidator, MinValueValidator
+from django.utils.text import slugify
 from django.db import models
 
 
@@ -70,4 +71,34 @@ class Course(models.Model):
     @name.setter
     def name(self, value):
         self.title = value
+        
+    def save(self, *args, **kwargs):
+        # Generate slug only if not set or title changed
+        if not self.slug or self.pk is None:
+            self.slug = self._generate_unique_slug(self.title)
+        else:
+            # Check if title has changed
+            try:
+                old_course = Course.objects.get(pk=self.pk)
+                if old_course.title != self.title:
+                    self.slug = self._generate_unique_slug(self.title)
+            except Course.DoesNotExist:
+                self.slug = self._generate_unique_slug(self.title)
+                
+        super().save(*args, **kwargs)
+        
+    def _generate_unique_slug(self, title):
+        base_slug = slugify(title)
+        if not base_slug:
+            # Fallback if title is only special characters
+            base_slug = "course"
+            
+        unique_slug = base_slug
+        counter = 1
+        
+        while Course.objects.filter(slug=unique_slug).exclude(pk=self.pk).exists():
+            unique_slug = f"{base_slug}-{counter}"
+            counter += 1
+            
+        return unique_slug
 
