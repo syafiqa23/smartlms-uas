@@ -5,9 +5,10 @@ from django.urls import include, path
 from django.views.generic import RedirectView
 
 from .api import api
-from .views import home
+from .views import health, home
 
 urlpatterns = [
+    path("health/", health, name="health"),
     path("", home, name="home"), 
     path("", include("appmongo.frontend_urls")),
     path("api/v1/", api.urls),

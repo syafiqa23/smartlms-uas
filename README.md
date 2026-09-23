@@ -431,3 +431,112 @@ Untuk pertanyaan atau bantuan, hubungi:
 ---
 
 **Selamat Belajar dan Semoga Sukses! 🎉**
+
+## 13. Deployment Production: Koyeb + Neon
+
+### Hasil Audit Deployment
+
+- Django: `Django>=5.0,<6.0`; Docker image menggunakan Python 3.12.
+- Runtime lokal saat audit: Python 3.13.2.
+- Entry point: `manage.py`; settings: `appmongo.settings`.
+- WSGI: `appmongo.wsgi:application`; tidak ada `asgi.py` aktual.
+- Database: PostgreSQL melalui `psycopg2-binary`, dengan Neon melalui `DATABASE_URL`.
+- API: Django Ninja dan `django-ninja-simple-jwt`, bukan Django REST Framework.
+- CORS: tidak ada konfigurasi atau dependency CORS.
+- Upload/media: avatar, thumbnail course, dan attachment content.
+- Celery, Redis, dan background worker: tidak digunakan.
+- Static files: WhiteNoise dengan `CompressedManifestStaticFilesStorage`.
+
+### Environment Variables Koyeb
+
+Buat variables berikut di Koyeb. Isi rahasia melalui dashboard Koyeb atau secret manager, bukan di source code:
+
+```text
+DJANGO_SECRET_KEY=<random-secret>
+DJANGO_DEBUG=False
+DJANGO_ALLOWED_HOSTS=<koyeb-domain>
+DJANGO_CSRF_TRUSTED_ORIGINS=https://<koyeb-domain>
+DATABASE_URL=<neon-connection-string>
+RUN_MIGRATIONS=True
+RUN_COLLECTSTATIC=True
+DJANGO_SECURE_SSL_REDIRECT=True
+DJANGO_SECURE_HSTS_SECONDS=31536000
+DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS=True
+DJANGO_SECURE_HSTS_PRELOAD=True
+```
+
+`DATABASE_URL` harus berupa connection string Neon lengkap. Jangan menaruh password, API key, atau connection string asli di GitHub. Gunakan pooled connection string Neon untuk aplikasi Koyeb.
+
+### Build, Run, dan Migration
+
+Gunakan Docker builder Koyeb; `Dockerfile` sudah memasang dependency, menjalankan `collectstatic`, dan memakai port yang diberikan Koyeb:
+
+```bash
+pip install -r requirements.txt
+gunicorn appmongo.wsgi:application --bind 0.0.0.0:$PORT
+python manage.py migrate --noinput
+```
+
+Entrypoint menjalankan migration dan collectstatic ketika `RUN_MIGRATIONS=True` dan `RUN_COLLECTSTATIC=True`. Jangan menjalankan `makemigrations` di production kecuali ada perubahan model yang disengaja.
+
+### Deployment Koyeb dari GitHub
+
+1. Review lalu push perubahan ke repository GitHub secara manual. Assistant tidak melakukan push atau deployment.
+2. Di Koyeb, buat App baru dan pilih deployment dari GitHub.
+3. Pilih repository, branch, dan Docker builder.
+4. Tambahkan environment variables production di atas sebagai values/secrets.
+5. Pastikan service memakai public port `8000`; aplikasi tetap bind ke `$PORT` yang diberikan Koyeb.
+6. Deploy dan periksa logs sampai migration serta Gunicorn berhasil.
+
+### Koneksi Neon
+
+1. Buat project/database PostgreSQL di Neon.
+2. Salin pooled connection string dari Neon.
+3. Simpan sebagai secret `DATABASE_URL` di Koyeb.
+4. Dengan `DJANGO_DEBUG=False`, konfigurasi mewajibkan SSL pada koneksi database.
+5. Jalankan migration dan verifikasi tabel aplikasi.
+
+Upload media tersimpan di filesystem container dan tidak persisten pada deployment stateless. Untuk production, gunakan object storage persisten sebelum mengandalkan upload pengguna.
+
+### Testing Setelah Deployment
+
+```bash
+curl https://<koyeb-domain>/
+curl https://<koyeb-domain>/api/v1/docs
+curl https://<koyeb-domain>/api/v1/openapi.json
+```
+
+Lanjutkan dengan login JWT, request endpoint course, upload media, dan akses admin. Periksa juga service status, deployment logs Koyeb, serta koneksi database Neon.
+
+## 14. Production VPS Deployment
+
+For the supported Ubuntu VPS deployment, use Docker Compose with PostgreSQL, Gunicorn, WhiteNoise, and Nginx:
+
+```text
+Internet -> Nginx -> 127.0.0.1:8000 (SmartLMS/Gunicorn) -> PostgreSQL internal Docker network
+```
+
+The production Compose configuration:
+
+- reads secrets and database credentials from an untracked `.env`;
+- does not publish PostgreSQL to the host;
+- uses a persistent named volume for PostgreSQL and media; static files are baked into the image;
+- runs the web image as a non-root user;
+- exposes `/health/` for container health checks;
+- runs Gunicorn instead of Django `runserver`.
+
+Create the environment file and deploy with:
+
+```bash
+cp .env.example .env
+chmod 600 .env
+docker compose config --quiet
+docker compose build
+docker compose up -d
+docker compose exec web python manage.py migrate --noinput
+docker compose exec web python manage.py collectstatic --noinput
+```
+
+Set `DJANGO_DEBUG=False`, a long random `DJANGO_SECRET_KEY`, the real `DJANGO_ALLOWED_HOSTS`, HTTPS `DJANGO_CSRF_TRUSTED_ORIGINS`, and strong PostgreSQL variables in `.env`. Never commit `.env`.
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for the complete VPS, Nginx, HTTPS, health check, update, and backup procedure.

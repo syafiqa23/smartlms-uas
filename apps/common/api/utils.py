@@ -11,8 +11,15 @@ def require_authenticated(request):
 
 def require_teacher(request):
     user = require_authenticated(request)
-    if user.role not in {"teacher", "admin"}:
+    if user.role != "teacher":
         raise HttpError(403, "Teacher role required.")
+    return user
+
+
+def require_teacher_or_admin(request):
+    user = require_authenticated(request)
+    if user.role not in {"teacher", "admin"}:
+        raise HttpError(403, "Teacher or Admin role required.")
     return user
 
 

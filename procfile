@@ -1,1 +1,1 @@
-web: gunicorn appmongo.wsgi
+web: gunicorn appmongo.wsgi:application --bind 0.0.0.0:$PORT

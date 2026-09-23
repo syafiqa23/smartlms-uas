@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from apps.comments.models import Comment
@@ -16,6 +16,10 @@ from apps.courses.models import Course
 from apps.members.models import CourseMember, Enrollment
 
 User = get_user_model()
+
+
+def health(request):
+    return JsonResponse({"status": "ok"})
 
 
 def home(request):
