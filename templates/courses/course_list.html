@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
     courseTableBody.appendChild(loadingRow);
     paginationContainer.style.display = 'none';
 
-    let url = '/api/v1/courses/?page=' + page + '&page_size=' + perPage;
+    let url = '/smartlms/api/v1/courses/?page=' + page + '&page_size=' + perPage;
     if (search) {
       url += '&search=' + encodeURIComponent(search);
     }
