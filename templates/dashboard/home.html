@@ -17,7 +17,7 @@
 
         <!-- TEACHER & ADMIN BUTTON (Only for staff/teacher) -->
         {% if user.is_authenticated and user.is_staff %}
-        <a href="/admin/courses/course/" class="btn btn-outline-primary rounded-pill shadow-sm">
+        <a href="/smartlms/admin/courses/course/" class="btn btn-outline-primary rounded-pill shadow-sm">
           <i class="bi bi-pencil-square me-2"></i>Manajemen Data Kursus
         </a>
         {% endif %}
