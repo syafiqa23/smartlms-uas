@@ -3,8 +3,9 @@ import io
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
+from django.db.models import Count, Max, Q
 from django.core.paginator import Paginator
-from django.db.models import Count, Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
@@ -418,9 +419,15 @@ def add_content(request, course_id):
     if request.method == "POST":
         form = CourseContentForm(request.POST, request.FILES)
         if form.is_valid():
-            content = form.save(commit=False)
-            content.course = course
-            content.save()
+            with transaction.atomic():
+                locked_course = Course.objects.select_for_update().get(pk=course.pk)
+                current_max_order = locked_course.contents.aggregate(
+                    max_order=Max("order")
+                )["max_order"] or 0
+                content = form.save(commit=False)
+                content.course = locked_course
+                content.order = current_max_order + 1
+                content.save()
             messages.success(request, "Konten berhasil ditambahkan!")
             return redirect("course_content_list", course_id=course.id)
     else:

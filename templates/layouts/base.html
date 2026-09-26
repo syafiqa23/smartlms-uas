@@ -213,15 +213,6 @@
               </a>
 
               <ul class="dropdown-menu dropdown-menu-end">
-                {% if user.is_staff %}
-                <li>
-                  <a class="dropdown-item" href="{% url 'admin:index' %}">
-                    <i class="bi bi-sliders me-2"></i>Admin Panel
-                  </a>
-                </li>
-                <li><hr class="dropdown-divider"></li>
-                {% endif %}
-
                 <li>
                   <form action="{% url 'logout' %}" method="post" class="m-0 p-0">
                     {% csrf_token %}
@@ -253,7 +244,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
-            const path = window.location.pathname;
+          const path = window.location.pathname;
         const navLinks = document.querySelectorAll('.nav-link[data-nav]');
         
         navLinks.forEach(link => {

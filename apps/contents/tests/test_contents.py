@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -12,6 +13,11 @@ User = get_user_model()
 
 
 class CourseContentTests(TestCase):
+    @staticmethod
+    def internal_url(url):
+        prefix = settings.FORCE_SCRIPT_NAME or ""
+        return url.removeprefix(prefix) or "/"
+
     def setUp(self):
         # Create users
         self.teacher = User.objects.create_user(
@@ -57,11 +63,17 @@ class CourseContentTests(TestCase):
         self.teacher2_token, _ = get_access_token_for_user(self.teacher2)
         self.student_token, _ = get_access_token_for_user(self.student)
 
-        self.list_url = reverse("smart_lms_api:list_contents")
-        self.create_url = reverse("smart_lms_api:create_content")
-        self.detail_url = reverse("smart_lms_api:get_content", args=[self.content.id])
-        self.update_url = reverse("smart_lms_api:update_content", args=[self.content.id])
-        self.delete_url = reverse("smart_lms_api:delete_content", args=[self.content.id])
+        self.list_url = self.internal_url(reverse("smart_lms_api:list_contents"))
+        self.create_url = self.internal_url(reverse("smart_lms_api:create_content"))
+        self.detail_url = self.internal_url(
+            reverse("smart_lms_api:get_content", args=[self.content.id])
+        )
+        self.update_url = self.internal_url(
+            reverse("smart_lms_api:update_content", args=[self.content.id])
+        )
+        self.delete_url = self.internal_url(
+            reverse("smart_lms_api:delete_content", args=[self.content.id])
+        )
 
     def test_list_contents_requires_auth(self):
         """Listing contents requires authentication."""
@@ -166,3 +178,43 @@ class CourseContentTests(TestCase):
             self.create_url, payload, content_type="application/json", **headers
         )
         self.assertEqual(response.status_code, 400)
+
+    def test_frontend_create_content_assigns_next_order(self):
+        """The frontend create form assigns the next available order."""
+        CourseContent.objects.create(
+            course=self.course,
+            title="Lesson 2 - Views",
+            description="Second lesson",
+            order=2,
+        )
+        CourseContent.objects.create(
+            course=self.course,
+            title="Lesson 3 - Templates",
+            description="Third lesson",
+            order=3,
+        )
+        self.client.force_login(self.teacher)
+        add_url = self.internal_url(reverse("add_content", args=[self.course.id]))
+        payload = {
+            "title": "Lesson 4 - Deployment",
+            "description": "Fourth lesson",
+            "video_url": "",
+            "order": 3,
+        }
+
+        response = self.client.post(add_url, payload)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            CourseContent.objects.get(course=self.course, title="Lesson 4 - Deployment").order,
+            4,
+        )
+
+        payload["title"] = "Lesson 5 - Review"
+        response = self.client.post(add_url, payload)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            CourseContent.objects.get(course=self.course, title="Lesson 5 - Review").order,
+            5,
+        )
