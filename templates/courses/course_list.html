@@ -178,21 +178,23 @@ document.addEventListener('DOMContentLoaded', () => {
     courseTableBody.appendChild(loadingRow);
     paginationContainer.style.display = 'none';
 
-    let url = '/smartlms/api/v1/courses/?page=' + page + '&page_size=' + perPage;
+    const apiUrl = new URL('{% url "smart_lms_api:list_courses" %}', window.location.origin);
+    apiUrl.searchParams.set('page', page);
+    apiUrl.searchParams.set('page_size', perPage);
     if (search) {
-      url += '&search=' + encodeURIComponent(search);
+      apiUrl.searchParams.set('search', search);
     }
     if (sortBy) {
-      url += '&sort_by=' + encodeURIComponent(sortBy);
+      apiUrl.searchParams.set('sort_by', sortBy);
     }
     if (priceMin) {
-      url += '&price_gte=' + encodeURIComponent(priceMin);
+      apiUrl.searchParams.set('price_gte', priceMin);
     }
     if (priceMax) {
-      url += '&price_lte=' + encodeURIComponent(priceMax);
+      apiUrl.searchParams.set('price_lte', priceMax);
     }
 
-    fetch(url)
+    fetch(apiUrl)
       .then(response => {
         if (!response.ok) {
           if (response.status === 429) {
@@ -249,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <span class="badge bg-warning text-dark">${course.content_count}</span>
         </td>
         <td class="text-center">
-          <a href="/smartlms/courses/${course.id}/" class="btn btn-sm btn-outline-primary rounded-pill shadow-sm">
+          <a href="${'{% url "course_detail" 0 %}'.replace('/0/', '/' + course.id + '/')}" class="btn btn-sm btn-outline-primary rounded-pill shadow-sm">
             <i class="bi bi-eye me-1"></i>Lihat
           </a>
         </td>

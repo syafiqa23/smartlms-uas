@@ -14,7 +14,7 @@ class ApiRateLimitMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        if request.path.startswith("/api/v1/"):
+        if request.path_info.startswith("/api/v1/"):
             response = self.rate_limit(request)
             if response:
                 return response
@@ -24,8 +24,9 @@ class ApiRateLimitMiddleware:
         now = int(time.time())
         window = now // self.window_seconds
         identity = self.identity(request)
-        limit = self.login_limit if request.path == "/api/v1/auth/login" else self.request_limit(request)
-        cache_key = f"throttle:{request.path}:{identity}:{window}"
+        path = request.path_info
+        limit = self.login_limit if path == "/api/v1/auth/login" else self.request_limit(request)
+        cache_key = f"throttle:{path}:{identity}:{window}"
         count = cache.get(cache_key, 0) + 1
         cache.set(cache_key, count, timeout=self.window_seconds)
         if count > limit:

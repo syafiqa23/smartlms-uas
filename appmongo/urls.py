@@ -12,7 +12,14 @@ urlpatterns = [
     path("", home, name="home"), 
     path("", include("appmongo.frontend_urls")),
     path("api/v1/", api.urls),
-    path("api/docs", RedirectView.as_view(url="/api/v1/docs", permanent=False)),
+    path(
+        "api/docs",
+        RedirectView.as_view(
+            pattern_name="smart_lms_api:openapi-view",
+            permanent=False,
+        ),
+        name="api_docs",
+    ),
     path("admin/", admin.site.urls),
 ]
 

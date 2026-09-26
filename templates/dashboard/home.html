@@ -17,20 +17,20 @@
 
         <!-- TEACHER & ADMIN BUTTON (Only for staff/teacher) -->
         {% if user.is_authenticated and user.is_staff %}
-        <a href="/smartlms/admin/courses/course/" class="btn btn-outline-primary rounded-pill shadow-sm">
+        <a href="{% url 'admin:courses_course_changelist' %}" class="btn btn-outline-primary rounded-pill shadow-sm">
           <i class="bi bi-pencil-square me-2"></i>Manajemen Data Kursus
         </a>
         {% endif %}
 
         <!-- ADMIN / SUPERUSER BUTTONS (Only for superuser) -->
         {% if user.is_authenticated and user.is_superuser %}
-        <a href="/smartlms/api/v1/docs" target="_blank" class="btn btn-outline-primary rounded-pill shadow-sm">
+        <a href="{% url 'smart_lms_api:openapi-view' %}" target="_blank" class="btn btn-outline-primary rounded-pill shadow-sm">
           <i class="bi bi-file-earmark-code me-2"></i>Swagger REST API Docs
         </a>
-        <a href="/admin/accounts/user/" class="btn btn-outline-primary rounded-pill shadow-sm">
+        <a href="{% url 'admin:accounts_user_changelist' %}" class="btn btn-outline-primary rounded-pill shadow-sm">
           <i class="bi bi-shield-lock me-2"></i>Manajemen User & Role JWT
         </a>
-        <a href="/admin/" class="btn btn-outline-primary rounded-pill shadow-sm">
+        <a href="{% url 'admin:index' %}" class="btn btn-outline-primary rounded-pill shadow-sm">
           <i class="bi bi-sliders me-2"></i>Panel Utama Django Admin
         </a>
         {% endif %}
@@ -88,9 +88,9 @@
         {% if user.is_authenticated %}
         <a class="list-group-item list-group-item-action" href="{% url 'my_courses' %}"><i class="bi bi-journal-bookmark me-2"></i>Mata Kuliah Saya</a>
         {% endif %}
-        <a class="list-group-item list-group-item-action" href="/smartlms/api/v1/docs" target="_blank"><i class="bi bi-file-earmark-code me-2"></i>Dokumentasi API</a>
+        <a class="list-group-item list-group-item-action" href="{% url 'smart_lms_api:openapi-view' %}" target="_blank"><i class="bi bi-file-earmark-code me-2"></i>Dokumentasi API</a>
         {% if user.is_staff %}
-        <a class="list-group-item list-group-item-action" href="/admin/"><i class="bi bi-sliders me-2"></i>Admin Panel</a>
+        <a class="list-group-item list-group-item-action" href="{% url 'admin:index' %}"><i class="bi bi-sliders me-2"></i>Admin Panel</a>
         {% endif %}
       </div>
     </div>

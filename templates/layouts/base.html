@@ -184,21 +184,21 @@
 
         <div class="collapse navbar-collapse" id="navMenu">
           <div class="navbar-nav ms-auto align-items-center">
-            <a class="nav-link" href="{% url 'core' %}" data-nav="core">
+            <a class="nav-link" href="{% url 'core' %}" data-nav="core" data-nav-path="{% url 'core' %}">
               <i class="bi bi-house-door me-1"></i>Home
             </a>
-            <a class="nav-link" href="{% url 'course_list' %}" data-nav="courses">
+            <a class="nav-link" href="{% url 'course_list' %}" data-nav="courses" data-nav-path="{% url 'course_list' %}">
               <i class="bi bi-book me-1"></i>Courses
             </a>
-            <a class="nav-link" href="/api/docs" target="_blank" data-nav="api">
+            <a class="nav-link" href="{% url 'smart_lms_api:openapi-view' %}" target="_blank" data-nav="api" data-nav-path="{% url 'smart_lms_api:openapi-view' %}">
               <i class="bi bi-file-earmark-code me-1"></i>API Docs
             </a>
 
             {% if user.is_authenticated %}
-            <a class="nav-link" href="{% url 'dashboard' %}" data-nav="dashboard">
+            <a class="nav-link" href="{% url 'dashboard' %}" data-nav="dashboard" data-nav-path="{% url 'dashboard' %}">
               <i class="bi bi-grid me-1"></i>Dashboard
             </a>
-            <a class="nav-link" href="{% url 'my_courses' %}" data-nav="my-courses">
+            <a class="nav-link" href="{% url 'my_courses' %}" data-nav="my-courses" data-nav-path="{% url 'my_courses' %}">
               <i class="bi bi-journal-bookmark me-1"></i>My Courses
             </a>
 
@@ -215,7 +215,7 @@
               <ul class="dropdown-menu dropdown-menu-end">
                 {% if user.is_staff %}
                 <li>
-                  <a class="dropdown-item" href="/admin/">
+                  <a class="dropdown-item" href="{% url 'admin:index' %}">
                     <i class="bi bi-sliders me-2"></i>Admin Panel
                   </a>
                 </li>
@@ -253,22 +253,24 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
-        const path = window.location.pathname;
+            const path = window.location.pathname;
         const navLinks = document.querySelectorAll('.nav-link[data-nav]');
         
         navLinks.forEach(link => {
           const navName = link.getAttribute('data-nav');
           let isActive = false;
           
-          if (navName === 'core' && (path === '/' || path === '')) {
+          const navPath = new URL(link.dataset.navPath, window.location.origin).pathname;
+
+          if (navName === 'core' && path === navPath) {
             isActive = true;
-          } else if (navName === 'courses' && path.startsWith('/courses')) {
+          } else if (navName === 'courses' && path.startsWith(navPath)) {
             isActive = true;
-          } else if (navName === 'dashboard' && path === '/dashboard/') {
+          } else if (navName === 'dashboard' && path === navPath) {
             isActive = true;
-          } else if (navName === 'my-courses' && path === '/my-courses/') {
+          } else if (navName === 'my-courses' && path === navPath) {
             isActive = true;
-          } else if (navName === 'api' && path.startsWith('/api')) {
+          } else if (navName === 'api' && path.startsWith(navPath)) {
             isActive = true;
           }
           

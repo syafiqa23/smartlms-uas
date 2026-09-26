@@ -162,8 +162,8 @@ TIME_ZONE = "Asia/Jakarta"
 USE_I18N = True
 USE_TZ = True
 
-
-STATIC_URL = "/static/"
+FORCE_SCRIPT_NAME = "/smartlms"
+STATIC_URL = "/smartlms/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Hanya gunakan STATICFILES_DIRS jika folder static memang ada
@@ -173,13 +173,13 @@ if STATIC_DIR.exists():
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-MEDIA_URL = "/media/"
+MEDIA_URL = "/smartlms/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 
-LOGIN_URL = "/login/"
-LOGIN_REDIRECT_URL = "/dashboard/"
-LOGOUT_REDIRECT_URL = "/login/"
+LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "dashboard"
+LOGOUT_REDIRECT_URL = "login"
 
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
