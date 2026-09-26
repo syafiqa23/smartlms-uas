@@ -15,10 +15,10 @@
           <i class="bi bi-book me-2"></i>Lihat Mata Kuliah (Frontend)
         </a>
 
-        <!-- TEACHER & ADMIN BUTTON (Only for staff/teacher) -->
+        <!-- BUILT-IN DJANGO ADMIN COURSE MANAGEMENT -->
         {% if user.is_authenticated and user.is_staff %}
         <a href="{% url 'admin:courses_course_changelist' %}" class="btn btn-outline-primary rounded-pill shadow-sm">
-          <i class="bi bi-pencil-square me-2"></i>Manajemen Data Kursus
+          <i class="bi bi-sliders me-2"></i>Panel Utama Django Admin
         </a>
         {% endif %}
 
@@ -28,12 +28,6 @@
         </a>
         {% endif %}
 
-        <!-- ADMIN MANAGEMENT LINKS USE THE BUILT-IN DJANGO ADMIN -->
-        {% if user.is_authenticated and user.is_superuser %}
-        <a href="{% url 'admin:accounts_user_changelist' %}" class="btn btn-outline-primary rounded-pill shadow-sm">
-          <i class="bi bi-shield-lock me-2"></i>Manajemen User & Role JWT
-        </a>
-        {% endif %}
       </div>
     </div>
     <div class="col-lg-4">
