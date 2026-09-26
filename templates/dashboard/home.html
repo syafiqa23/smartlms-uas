@@ -17,7 +17,7 @@
 
         <!-- BUILT-IN DJANGO ADMIN COURSE MANAGEMENT -->
         {% if user.is_authenticated and user.is_staff %}
-        <a href="{% url 'admin:courses_course_changelist' %}" class="btn btn-outline-primary rounded-pill shadow-sm">
+        <a href="{% url 'admin:index' %}" class="btn btn-outline-primary rounded-pill shadow-sm">
           <i class="bi bi-sliders me-2"></i>Panel Utama Django Admin
         </a>
         {% endif %}
